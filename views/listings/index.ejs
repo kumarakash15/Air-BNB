@@ -1,15 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wander Lust</title>
-</head>
-<style>
-    ul li a{
-        text-decoration: none;
-    }
-</style>
+<%layout("/layout/bollerplate")%>
 <body>
     <h3>All listing</h3>
     <ul>
@@ -17,9 +6,7 @@
             <li><a href="/listings/<%=listing.id%>"><%=listing.title %></a></li>
         <% }%>
     </ul>
-    <form method="get" action="/listings/new">
+    <!-- <form method="get" action="/listings/new">
         <button>Create New Listing</button>
-    </form>
+    </form> -->
 </body>
-
-</html>

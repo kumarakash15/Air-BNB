@@ -5,12 +5,15 @@ const port=5500;
 const Listing=require("./models/listing");
 const path=require("path")
 const methodOverride = require("method-override");
+const ejsMate=require("ejs-mate");
 const mongo_url="mongodb://127.0.0.1:27017/wanderlust";
 
 app.set("view engine","ejs");
 app.set("views",path.join(__dirname,"views"));
 app.use(expreess.urlencoded({extended:true}));
 app.use(methodOverride("_method"));
+app.engine('ejs',ejsMate);
+app.use(expreess.static(path.join(__dirname,"/public")));
 
 main().then(()=>{
     console.log("connected to DB");
@@ -20,6 +23,10 @@ main().then(()=>{
 async function main() {
     await mongoose.connect(mongo_url);
 }
+
+app.get("/",(req,res)=>{
+    res.send("hii i am root");
+})
 
 app.get("/listings",async(req,res)=>{
     const alllistings= await Listing.find({})
@@ -52,6 +59,12 @@ app.get("/listings/:id/edit",async(req,res)=>{
 app.put("/listings/:id",async(req,res)=>{
     let {id}=req.params;
     await Listing.findByIdAndUpdate(id,{...req.body.Listing});
+    res.redirect(`/listings/${id}`);
+})
+
+app.delete("/listings/:id",async(req,res)=>{
+    let {id}=req.params;
+    await Listing.findByIdAndDelete(id);
     res.redirect("/listings");
 })
 

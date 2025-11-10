@@ -1,10 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wander Lust</title>
-</head>
+<%layout("/layout/bollerplate")%>
 <body>
     <h3>Edit Listings</h3>
     <form method="post" action="/listings/<%= listing._id %>?_method=PUT">
@@ -18,4 +12,3 @@
         <button>Edit</button>
     </form>
 </body>
-</html>
