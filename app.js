@@ -3,19 +3,24 @@ const app = expreess();
 const mongoose = require('mongoose');
 const port = 5500;
 const Listing = require("./models/listing");
+const Review = require("./models/review");
 const wrapAsync = require("./utils/wrapAsync");
 const ExpressError = require("./utils/ExpressError");
+const { Listingschema,ReviewSchema } = require("./schema.js")
 const path = require("path")
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
+const review = require("./models/review");
 const mongo_url = "mongodb://127.0.0.1:27017/wanderlust";
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
+app.engine("ejs", ejsMate);
+app.use(expreess.json());
 app.use(expreess.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
-app.engine('ejs', ejsMate);
-app.use(expreess.static(path.join(__dirname, "/public")));
+app.use(expreess.static(path.join(__dirname, "public")));
+
 
 main().then(() => {
     console.log("connected to DB");
@@ -25,6 +30,24 @@ main().then(() => {
 async function main() {
     await mongoose.connect(mongo_url);
 }
+
+const validateListing = (req, res, next) => {
+    const { error } = Listingschema.validate(req.body);
+    if (error) {
+        const errmsg = error.details.map(el => el.message).join(", ");
+        throw new ExpressError(400, errmsg);
+    }
+    next();
+};
+
+const validateReview = (req, res, next) => {
+    const { error } = ReviewSchema.validate(req.body);
+    if (error) {
+        const errmsg = error.details.map(el => el.message).join(", ");
+        throw new ExpressError(400, errmsg);
+    }
+    next();
+};
 
 app.get("/", (req, res) => {
     res.send("hii i am root");
@@ -39,10 +62,7 @@ app.get("/listings", wrapAsync(async (req, res) => {
 app.get("/listings/new", (req, res) => {
     res.render("./listings/new.ejs")
 })
-app.post("/listings", wrapAsync(async (req, res, next) => {
-    if (!req.body.Listing) {
-        throw new ExpressError(400, "Send Valid data for Listings")
-    }
+app.post("/listings", validateListing,wrapAsync(async (req, res, next) => {
     const newlisting = new Listing(req.body.Listing);
     await newlisting.save();
     res.redirect("/listings")
@@ -51,7 +71,7 @@ app.post("/listings", wrapAsync(async (req, res, next) => {
 //show route
 app.get("/listings/:id", wrapAsync(async (req, res) => {
     let { id } = req.params;
-    const listing = await Listing.findById(id);
+    const listing = await Listing.findById(id).populate("reviews");
     res.render("./listings/show.ejs", { listing });
 }));
 
@@ -61,7 +81,7 @@ app.get("/listings/:id/edit", wrapAsync(async (req, res) => {
     const listing = await Listing.findById(id);
     res.render("./listings/edit.ejs", { listing })
 }))
-app.put("/listings/:id", wrapAsync(async (req, res) => {
+app.put("/listings/:id", validateListing,wrapAsync(async (req, res) => {
     if (!req.body.Listing) {
         throw new ExpressError(400, "Send Valid data for Listings")
     }
@@ -77,18 +97,22 @@ app.delete("/listings/:id", wrapAsync(async (req, res) => {
     res.redirect("/listings");
 }))
 
-// app.get("/testListing",async(req,res)=>{
-//     let SampleListing=new Listing({
-//         title:"my new house",
-//         description:"near the river",
-//         price:1500,
-//         location:"goa",
-//         country:"india",
-//     });
-//     await SampleListing.save();
-//     console.log("sample was saved");
-//     res.send("successfull")
-// })
+//Reviews
+app.post("/listings/:id/reviews",validateReview, wrapAsync(async (req, res) => {
+    let listing=await Listing.findById(req.params.id);
+    let newReview=new Review(req.body.review);
+    listing.reviews.push(newReview);
+    await newReview.save();
+    await listing.save();
+    res.redirect(`/listings/${listing._id}`);
+}));
+
+app.delete("/listings/:id/reviews/:reviewid", wrapAsync(async (req, res) => {
+    let { id, reviewid } = req.params;
+    await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewid } });
+    await Review.findByIdAndDelete(reviewid);
+    res.redirect(`/listings/${id}`);
+}));
 
 app.use((req, res, next) => {
     next(new ExpressError(404, "Page not found"));
@@ -96,8 +120,7 @@ app.use((req, res, next) => {
 
 app.use((err, req, res, next) => {
     let { status = 500, message = "internal server error!" } = err;
-    res.render("./listings/error.ejs",{status,message})
-    //res.status(status).send(message);
+    res.render("./listings/error.ejs", { status, message })
 })
 
 app.listen(port, () => {
