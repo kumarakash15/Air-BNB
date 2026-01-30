@@ -1,0 +1,31 @@
+<%layout("/layout/bollerplate")%>
+
+    <body>
+        <div class="row mt-3">
+            <div class="col-6 offset-3">
+                <h1>Signup for WanderLust</h1>
+                <form action="/signup" method="post" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">user name:</label>
+                        <input type="text" name="username" id="username" placeholder="Enter user name" class="form-control"
+                            required>
+                        <div class="valid-feedback">username Looks good!</div>
+                        <div class="invalid-feedback">Please Enter username</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">E-mail:</label>
+                        <input type="email" name="email" id="email" placeholder="Enter Your E-mail" class="form-control"
+                            required>
+                        <div class="valid-feedback">E-mail Looks good!</div>
+                        <div class="invalid-feedback">Please Enter E-mail</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">password:</label>
+                        <input type="password" name="password" id="password" placeholder="Enter Your password" class="form-control"
+                            required>
+                    </div>
+                    <button class="btn btn-success">Sign Up</button>
+                </form>
+            </div>
+        </div>
+    </body>

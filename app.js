@@ -6,11 +6,16 @@ const ExpressError = require("./utils/ExpressError");
 const path = require("path")
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
-const Listings = require("./routes/listing");
-const Reviews = require("./routes/reviews");
 const session = require("express-session");
 const flash = require("connect-flash");
 const mongo_url = "mongodb://127.0.0.1:27017/wanderlust";
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const User = require("./models/user");
+
+const ListingsRouter = require("./routes/listing");
+const ReviewsRouter = require("./routes/reviews");
+const userRouter = require("./routes/user");
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -19,15 +24,6 @@ app.use(expreess.json());
 app.use(expreess.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.use(expreess.static(path.join(__dirname, "public")));
-
-main().then(() => {
-    console.log("connected to DB");
-}).catch((err) => {
-    console.log(err);
-})
-async function main() {
-    await mongoose.connect(mongo_url);
-}
 
 const sesssionOption={
     secret:"mysecretkey",
@@ -40,6 +36,23 @@ const sesssionOption={
     }
 };
 
+app.use(session(sesssionOption));
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+main().then(() => {
+    console.log("connected to DB");
+}).catch((err) => {
+    console.log(err);
+})
+async function main() {
+    await mongoose.connect(mongo_url);
+}
+
 app.get("/", (req, res) => {
     res.send("hii i am root");
 })
@@ -48,11 +61,13 @@ app.use(session(sesssionOption));
 app.use(flash());
 app.use((req, res, next) => {
     res.locals.success = req.flash("success");
-    res.locals.error = req.flash("Error");
+    res.locals.error = req.flash("error");
     next();
 });
-app.use("/listings", Listings);
-app.use("/listings/:id/reviews", Reviews);
+
+app.use("/listings", ListingsRouter);
+app.use("/listings/:id/reviews", ReviewsRouter);
+app.use("/",userRouter)
 
 app.use((req, res, next) => {
     next(new ExpressError(404, "Page not found"));

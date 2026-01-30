@@ -49,7 +49,7 @@ router.get("/:id/edit", wrapAsync(async (req, res) => {
     const listing = await Listing.findById(id);
 
     if (!listing) {
-        req.flash("Error", "Listing not found");
+        req.flash("error", "Listing not found");
         return res.redirect("/listings");
     }
 
