@@ -11,13 +11,19 @@ module.exports.index=async (req, res) => {
 module.exports.renderNewform=(req, res) => {
     res.render("./listings/new.ejs")
 };
-module.exports.newListing=async (req, res, next) => {
-    const newlisting = new Listing(req.body.Listing);
-    newlisting.owner=req.user._id;
-    await newlisting.save();
-    req.flash("success", "New Listing Created Successfully");
-    res.redirect("/listings")
-}
+module.exports.newListing = async (req, res, next) => {
+  const newListing = new Listing(req.body.Listing);
+  newListing.owner = req.user._id;
+  if (req.file) {
+    newListing.image = {
+      url: req.file.path, 
+      filename: req.file.filename
+    };
+  }
+  await newListing.save();
+  req.flash("success", "New Listing Created Successfully");
+  res.redirect("/listings");
+};
 
 //show route
 module.exports.ShowListing=async (req, res) => {

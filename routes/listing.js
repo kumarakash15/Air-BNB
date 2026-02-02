@@ -3,21 +3,22 @@ const router=express.Router();
 const wrapAsync = require("../utils/wrapAsync");
 const {isLoggedin , isowner , validateListing} =require("../middleware.js");
 const Listingcontroller=require("../contrrollers/listing.js")
+const multer  = require('multer')
+const {storage}=require("../cloudConfig.js")
+const upload = multer({ storage })
 
-router.get("/", wrapAsync(Listingcontroller.index));
+router.route("/")
+.get(wrapAsync(Listingcontroller.index))
+.post(isLoggedin,validateListing,upload.single('Listing[image][url]'),wrapAsync(Listingcontroller.newListing))
 
-//new route
 router.get("/new",isLoggedin,Listingcontroller.renderNewform)
-router.post("/", validateListing,wrapAsync(Listingcontroller.newListing))
 
-//show route
-router.get("/:id", wrapAsync(Listingcontroller.ShowListing));
+router.route("/:id")
+.get(wrapAsync(Listingcontroller.ShowListing))
+.put(isLoggedin,isowner, validateListing,wrapAsync(Listingcontroller.UpdateListing))
+.delete(isLoggedin,isowner, wrapAsync(Listingcontroller.DeleteListing))
 
 //edit route
 router.get("/:id/edit",isLoggedin,isowner, wrapAsync(Listingcontroller.RenderEditForm));
-router.put("/:id",isLoggedin,isowner, validateListing,wrapAsync(Listingcontroller.UpdateListing))
-
-//delete route
-router.delete("/:id",isLoggedin,isowner, wrapAsync(Listingcontroller.DeleteListing))
 
 module.exports=router;
