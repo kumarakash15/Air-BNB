@@ -1,18 +1,39 @@
-// Example starter JavaScript for disabling form submissions if there are invalid fields
 (() => {
   'use strict'
-  // Fetch all the forms we want to apply custom Bootstrap validation styles to
   const forms = document.querySelectorAll('.needs-validation')
-
-  // Loop over them and prevent submission
   Array.from(forms).forEach(form => {
     form.addEventListener('submit', event => {
       if (!form.checkValidity()) {
         event.preventDefault()
         event.stopPropagation()
       }
-
       form.classList.add('was-validated')
     }, false)
   })
 })()
+
+if (typeof listingLocation !== "undefined") {
+  const map = L.map('map').setView([20.2961, 85.8245], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+  fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${listingLocation}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.length > 0) {
+        const lat = data[0].lat;
+        const lon = data[0].lon;
+
+        map.setView([lat, lon], 13);
+
+        L.marker([lat, lon])
+          .addTo(map)
+          .bindPopup(`
+    <div style="text-align:center">
+        <h6>${listingLocation}</h6>
+        <p>This is the listing location.</p>
+    </div>
+`)
+      }
+    });
+}

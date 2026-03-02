@@ -9,13 +9,13 @@ const upload = multer({ storage })
 
 router.route("/")
 .get(wrapAsync(Listingcontroller.index))
-.post(isLoggedin,validateListing,upload.single('Listing[image][url]'),wrapAsync(Listingcontroller.newListing))
+.post(isLoggedin,upload.single('Listing[image][url]'),validateListing,wrapAsync(Listingcontroller.newListing))
 
 router.get("/new",isLoggedin,Listingcontroller.renderNewform)
 
 router.route("/:id")
 .get(wrapAsync(Listingcontroller.ShowListing))
-.put(isLoggedin,isowner, validateListing,wrapAsync(Listingcontroller.UpdateListing))
+.put(isLoggedin,isowner,upload.single('Listing[image][url]'), validateListing,wrapAsync(Listingcontroller.UpdateListing))
 .delete(isLoggedin,isowner, wrapAsync(Listingcontroller.DeleteListing))
 
 //edit route
