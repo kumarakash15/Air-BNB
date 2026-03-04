@@ -57,10 +57,6 @@ async function main() {
     await mongoose.connect(mongo_url);
 }
 
-app.get("/", (req, res) => {
-    res.send("hii i am root");
-})
-
 app.use(session(sesssionOption));
 app.use(flash());
 app.use((req, res, next) => {

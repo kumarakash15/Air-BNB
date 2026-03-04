@@ -31,9 +31,21 @@ if (typeof listingLocation !== "undefined") {
           .bindPopup(`
     <div style="text-align:center">
         <h6>${listingLocation}</h6>
-        <p>This is the listing location.</p>
+        <p>This is the Exact location.</p>
     </div>
 `)
       }
     });
 }
+
+let taxSwitch = document.getElementById("switchCheckDefault");
+taxSwitch.addEventListener("click", () => {
+  let taxInfo = document.getElementsByClassName("tax-info");
+  for (info of taxInfo) {
+    if (info.style.display != "inline") {
+      info.style.display = "inline";
+    } else {
+      info.style.display = "none";
+    }
+  }
+});

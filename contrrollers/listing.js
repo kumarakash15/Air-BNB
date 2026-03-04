@@ -2,9 +2,17 @@ const ExpressError = require("../utils/ExpressError");
 const Listing = require("../models/listing");
 
 //index route
-module.exports.index=async (req, res) => {
-    const alllistings = await Listing.find({})
-    res.render("./listings/index.ejs", { alllistings })
+module.exports.index = async (req, res) => {
+    const { category } = req.query;
+    let filter = {};
+    if (category) {
+        filter.category = category;
+    }
+    const alllistings = await Listing.find(filter);
+    res.render("./listings/index.ejs", { 
+        alllistings,
+        selectedCategory: category
+    });
 };
 
 //new route
@@ -45,7 +53,6 @@ module.exports.RenderEditForm = async (req, res) => {
         return res.redirect("/listings");
     }
     let OriginalImageUrl = listing.image.url;
-    console.log(OriginalImageUrl);
     OriginalImageUrl = OriginalImageUrl.replace("/upload","/upload/w_250");
     res.render("./listings/edit.ejs", { listing, OriginalImageUrl });
 };
