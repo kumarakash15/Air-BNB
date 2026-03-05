@@ -1,3 +1,5 @@
+const dns = require('dns');
+dns.setServers(['8.8.8.8', '8.8.4.4']);
 if(process.env.NODE_ENV!="production"){
     require('dotenv').config()
 }
@@ -11,8 +13,9 @@ const path = require("path")
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const session = require("express-session");
+const MongoStore = require("connect-mongo").default;
 const flash = require("connect-flash");
-const mongo_url = "mongodb://127.0.0.1:27017/wanderlust";
+const dbUrl=process.env.ATLASDB_URL;
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user");
@@ -29,8 +32,20 @@ app.use(expreess.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.use(expreess.static(path.join(__dirname, "public")));
 
+const store=MongoStore.create({
+    mongoUrl:dbUrl,
+    crypto:{
+        secret:process.env.SECRET
+    },
+    touchAfter:24*3600,
+});
+store.on("error",(e)=>{
+    console.log("session store error",e);
+});
+
 const sesssionOption={
-    secret:"mysecretkey",
+    store,
+    secret:process.env.SECRET,
     resave:false,
     saveUninitialized:true,
     cookie:{
@@ -54,10 +69,9 @@ main().then(() => {
     console.log(err);
 })
 async function main() {
-    await mongoose.connect(mongo_url);
+    await mongoose.connect(dbUrl);
 }
 
-app.use(session(sesssionOption));
 app.use(flash());
 app.use((req, res, next) => {
     res.locals.success = req.flash("success");
