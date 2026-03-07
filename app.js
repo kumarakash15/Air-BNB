@@ -64,7 +64,7 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 main().then(() => {
-    console.log("connected to DB");
+    console.log("connected to Mongo Atlas");
 }).catch((err) => {
     console.log(err);
 })

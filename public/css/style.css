@@ -25,10 +25,12 @@ body {
 }
 
 .btn-search {
+    display: flex;
+    align-items: center;
     background-color: #ff385c;
     color: white;
     border-radius: 25px;
-    padding: 0 1rem;
+    padding: 0 2rem;
 }
 
 .btn-search:hover {
@@ -37,13 +39,19 @@ body {
 }
 
 .btn-search i {
-    display: inline;
     margin-right: 0.5rem;
 }
 
 .search-input {
     border-radius: 25px;
-    padding: 0.5rem 3rem;
+    padding: 0.5rem 2rem;
+}
+
+/* Mobile search */
+.search-input-mobile{
+    border-radius: 25px;
+    padding: 0.4rem 1rem;
+    width: 120px;
 }
 
 /* footer */
