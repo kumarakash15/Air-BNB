@@ -1,5 +1,5 @@
 const dns = require("dns");
-dns.setServers(["8.8.8.8", "8.8.4.4"]); // force Google DNS
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 const mongoose = require("mongoose");
 const initdata = require("./data");
@@ -23,14 +23,24 @@ async function main() {
 }
 
 const initDB = async () => {
-  await Listing.deleteMany({});
-
   const newData = initdata.data.map((obj) => ({
     ...obj,
     owner: "69a852b4507a4ec2fea0e75f",
   }));
 
-  await Listing.insertMany(newData);
+  for (let data of newData) {
+    const exists = await Listing.findOne({
+      title: data.title,
+      location: data.location
+    });
 
-  console.log("Data initialized successfully");
+    if (!exists) {
+      await Listing.create(data);
+      console.log(`Added: ${data.title}`);
+    } else {
+      console.log(`Skipped (already exists): ${data.title}`);
+    }
+  }
+
+  console.log("Data initialization complete");
 };

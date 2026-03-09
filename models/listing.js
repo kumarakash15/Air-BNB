@@ -4,9 +4,10 @@ const Review = require("./review");
 
 const ListingSchema = new Schema({
   title: {
-    type: String,
-    required: true,
-  },
+  type: String,
+  required: true,
+  unique: true
+},
   description: String,
   image: {
     url: String,

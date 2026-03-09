@@ -3,45 +3,57 @@ const Listing = require("../models/listing");
 
 //index route
 module.exports.index = async (req, res) => {
-    const { category } = req.query;
+    const { category, search } = req.query;
     let filter = {};
     if (category) {
         filter.category = category;
     }
+    if (search) {
+        filter.$or = [
+            { title: { $regex: search, $options: "i" } },
+            { location: { $regex: search, $options: "i" } },
+            { country: { $regex: search, $options: "i" } }
+        ];
+    }
     const alllistings = await Listing.find(filter);
-    res.render("./listings/index.ejs", { 
+    if (search && alllistings.length === 0) {
+        req.flash("error", `No listing found for "${search}". Try searching another hotel or location.`);
+        return res.redirect("/listings");
+    }
+    res.render("./listings/index.ejs", {
         alllistings,
-        selectedCategory: category
+        selectedCategory: category,
+        searchQuery: search
     });
 };
 
 //new route
-module.exports.renderNewform=(req, res) => {
+module.exports.renderNewform = (req, res) => {
     res.render("./listings/new.ejs")
 };
 module.exports.newListing = async (req, res, next) => {
-  const newListing = new Listing(req.body.Listing);
-  newListing.owner = req.user._id;
-  if (req.file) {
-    newListing.image = {
-      url: req.file.path, 
-      filename: req.file.filename
-    };
-  }
-  await newListing.save();
-  req.flash("success", "New Listing Created Successfully");
-  res.redirect("/listings");
+    const newListing = new Listing(req.body.Listing);
+    newListing.owner = req.user._id;
+    if (req.file) {
+        newListing.image = {
+            url: req.file.path,
+            filename: req.file.filename
+        };
+    }
+    await newListing.save();
+    req.flash("success", "New Listing Created Successfully");
+    res.redirect("/listings");
 };
 
 //show route
-module.exports.ShowListing=async (req, res) => {
-  const { id } = req.params;
-  const listing = await Listing.findById(id).populate({path: "reviews",populate: {path: "author"}}).populate("owner");
-  if (!listing) {
-    req.flash("error", "Listing not found");
-    return res.redirect("/listings");
-  }
-  res.render("./listings/show.ejs", { listing });
+module.exports.ShowListing = async (req, res) => {
+    const { id } = req.params;
+    const listing = await Listing.findById(id).populate({ path: "reviews", populate: { path: "author" } }).populate("owner");
+    if (!listing) {
+        req.flash("error", "Listing not found");
+        return res.redirect("/listings");
+    }
+    res.render("./listings/show.ejs", { listing });
 }
 
 //edit route
@@ -53,7 +65,7 @@ module.exports.RenderEditForm = async (req, res) => {
         return res.redirect("/listings");
     }
     let OriginalImageUrl = listing.image.url;
-    OriginalImageUrl = OriginalImageUrl.replace("/upload","/upload/w_250");
+    OriginalImageUrl = OriginalImageUrl.replace("/upload", "/upload/w_250");
     res.render("./listings/edit.ejs", { listing, OriginalImageUrl });
 };
 
@@ -62,9 +74,9 @@ module.exports.UpdateListing = async (req, res) => {
         throw new ExpressError(400, "Send Valid data for Listings");
     }
     let { id } = req.params;
-    let updatedListing = await Listing.findByIdAndUpdate(id,{ ...req.body.Listing },{ new: true }
+    let updatedListing = await Listing.findByIdAndUpdate(id, { ...req.body.Listing }, { new: true }
     );
-    if (typeof req.file !=="undefined") {
+    if (typeof req.file !== "undefined") {
         updatedListing.image = {
             url: req.file.path,
             filename: req.file.filename
@@ -76,7 +88,7 @@ module.exports.UpdateListing = async (req, res) => {
 };
 
 //delete route
-module.exports.DeleteListing=async (req, res) => {
+module.exports.DeleteListing = async (req, res) => {
     let { id } = req.params;
     await Listing.findByIdAndDelete(id);
     req.flash("success", "Listing Deleted Successfully");

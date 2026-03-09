@@ -7,9 +7,9 @@
     </a>
 
     <!-- Mobile Search -->
-    <form class="d-flex d-md-none me-2" role="search">
-      <input class="form-control search-input-mobile" type="search" placeholder="Search">
-      <button class="btn btn-search ms-1" type="submit">
+    <form class="d-flex d-md-none me-2" action="/listings" method="GET">
+      <input class="form-control search-input-mobile" type="search" name="search" placeholder="Search">
+      <button class="btn btn-search" type="submit">
         <i class="fa-solid fa-magnifying-glass"></i>
       </button>
     </form>
@@ -28,8 +28,10 @@
 
       <!-- Desktop Search -->
       <div class="navbar-nav ms-auto">
-        <form class="d-flex">
-          <input class="form-control me-2 search-input" type="search" placeholder="Search Destination">
+        <form class="d-flex" action="/listings" method="GET">
+          <input class="form-control me-2 search-input" type="search" name="search"
+            placeholder="Search hotel or location">
+
           <button class="btn btn-search">
             <i class="fa-solid fa-magnifying-glass"></i> Search
           </button>
@@ -42,11 +44,11 @@
         <% if(!CurrentUser){ %>
           <a class="nav-link btn btn-outline-success" href="/signup">Signup</a>
           <a class="nav-link btn btn-outline-info" href="/login">Login</a>
-        <% } %>
+          <% } %>
 
-        <% if(CurrentUser){ %>
-          <a class="nav-link btn btn-outline-danger" href="/logout">Logout</a>
-        <% } %>
+            <% if(CurrentUser){ %>
+              <a class="nav-link btn btn-outline-danger" href="/logout">Logout</a>
+              <% } %>
       </div>
 
     </div>
@@ -70,11 +72,11 @@
     <% if(!CurrentUser){ %>
       <a class="nav-link mb-3 btn btn-outline-success" href="/signup">Signup</a>
       <a class="nav-link mb-3 btn btn-outline-info" href="/login">Login</a>
-    <% } %>
+      <% } %>
 
-    <% if(CurrentUser){ %>
-      <a class="nav-link mb-3 btn btn-outline-danger" href="/logout">Logout</a>
-    <% } %>
+        <% if(CurrentUser){ %>
+          <a class="nav-link mb-3 btn btn-outline-danger" href="/logout">Logout</a>
+          <% } %>
 
   </div>
 </div>
